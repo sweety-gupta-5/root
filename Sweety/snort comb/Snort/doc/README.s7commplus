@@ -1,0 +1,132 @@
+S7Commplus Preprocessor
+=======================
+
+
+Overview
+========
+The S7commplus preprocessor is a Snort module that decodes the S7commplus 
+protocol. It also provides rule options to access certain protocol fields.
+This allows a user to write rules for S7commplus packets without decoding
+the protocol with a series of "content" and "byte_test" options.
+
+S7commplus is a protocol used in SCADA networks, especially by SIEMENS 
+PLCs(S7 1500 and S7 1200 family). If your network does not contain any 
+S7commplus-enabled devices, we recommend leaving this preprocessor turned off.
+
+Dependencies
+============
+The Stream5 preprocessor must be enabled for the S7commplus preprocessor to 
+work. Protocol-Aware Flushing (PAF) is also required. See README.stream5 for 
+more information.
+
+Preprocessor Configuration
+==========================
+S7commplus configuration is split into two parts: the preprocessor config, and
+the rule options. The preprocessor config starts with:
+
+preprocesor s7commplus:
+
+Options are as follows:
+
+    Option              Argument        Required    Default
+    --------------------------------------------------------------
+    ports               <number>, or       NO       ports 102
+                    { port [port] ... }
+
+
+Option explanations 
+     ports
+	     This sets the port numbers on which S7commplus traffic is inspected. 
+		 A single port number may be provided, or a space-separated list 
+		 enclosed in curly brackets. The default is port 102.
+
+Example preprocessor config
+
+preprocessor s7commplus: ports { 102 }
+
+Rule Options
+============
+The s7commplus preprocessor adds 3 new rule options. These rule options match
+on various pieces of the S7commplus headers and data.
+
+The preprocessor must be enabled for these rule options to work.
+
+s7commplus_func
+---------------
+This option matches against the Function Code inside a S7commplus 
+Application-Layer request/response header. The code may be a number
+(in hexadecimal format), or a string from the list provided below.
+
+Syntax: 
+    s7commplus_func:<code>
+
+    code  = 
+	        explore (0x04BB)
+	        createobject (0x04CA)
+	        deleteobject (0x04D4)
+	        setvariable (0x04F2)
+	        getlink (0x0524)
+	        setmultivar (0x0542)
+	        getmultivar (0x054C)
+	        beginsequence (0x0556)
+	        endsequence (0x0560)
+            invoke (0x056B)
+	        getvarsubstr (0x0586)
+
+Example:
+    alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"S7commplus CREATEOBJECT"; \
+	   	s7commplus_func: 0x04CA; sid:100131; rev:1;)
+	alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"s7commplus CREATEOBJECT"; \
+		s7commplus_func: createobject; sid:100131; rev:1;)
+
+s7commplus_opcode
+-----------------
+This rule option matches against the Opcode field in a S7commplus Data
+header. The code may be a number (in hexadecimal format), or a string 
+from the list provided below.
+
+Syntax: 
+    s7commplus_opcode:<opcode>
+
+opcode = 
+	     request (0x31)
+	     response (0x32)
+	     notification (0x33) 
+	     response2 (0x02)
+
+Example:
+    alert tcp $HOME_NET any -> $EXTERNAL_NET 102 ( msg:"SIEMENS S7COMMPLUS REQUEST"; \
+        s7commplus_opcode: 0x31; sid:100121; rev:1; )
+	alert tcp $HOME_NET any -> $EXTERNAL_NET 102 ( msg:"SIEMENS S7COMMPLUS REQUEST"; \
+        s7commplus_opcode: request; sid:100121; rev:1; )
+
+s7commplus_content
+------------------
+This rule option sets the cursor at the beginning of the Data field in a 
+S7commplus request/response.
+
+Syntax: 
+    s7commplus_content ; 
+
+    No options.
+
+Example:
+	alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"s7commplus 0000 0120 3600"; \
+        s7commplus_content; content:"|0000 0120 3600|"; sid:100151; rev:1;)
+	alert tcp $HOME_NET any -> $EXTERNAL_NET any (msg:"s7commplus 8232 8231 8E26"; \
+        s7commplus_content; content:"|8232 8231 8E26|"; sid:100152; rev:1;)
+
+Preprocessor Rules
+==================
+The S7commplus preprocessor uses GID 149 for its preprocessor events.
+
+SID     Description
+-------------------
+  1     The length in S7commplus application header does not match 
+        the length needed for the given S7commplus function code.
+
+        Each S7commplus function has an expected format for requests and responses.
+        If the length of the message does not match the expected format, this alert
+        is generated.
+
+  2     Reserved S7commplus function code in use

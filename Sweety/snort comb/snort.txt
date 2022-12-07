@@ -1,0 +1,29 @@
+Snort is referred to as a packet sniffer that monitors network traffic, scrutinizing each packet closely to detect a dangerous payload or suspicious anomalies. Long a leader among enterprise intrusion prevention and detection tools
+
+snort -V
+
+ipconfig
+
+snort -W
+
+snort -i -1 -c C:\Snort\etc\snort.conf -T
+
+snort -i 4 -c C:\Snort\etc\snort.conf -A console
+
+
+
+https://youtu.be/-AkUidedDlY
+
+https://www.securityarchitecture.com/learning/intrusion-detection-systems-learning-with-snort/configuring-snort/
+
+
+https://docs.google.com/document/d/1tJFgwGDCDemp_IqVIaemDrk2wKm_nLrFwx8tX4xxCY4/edit?usp=sharing
+
+https://github.com/sweet1125/root
+
+
+keytool -genkey alias Kshitij -keyalg RSA -keystore "D:\local.keystore"
+
+keytool -v -list -keystore local.keystore
+
+keytool -export -alias kshitij -file "D:\certificate.cer" -keystore "D:\local.keystore"

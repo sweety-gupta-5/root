@@ -1,0 +1,6 @@
+
+Plain text is: abcdef
+Key is: cc
+Cipher text is: cdefgh
+
+Plain text after decryption is: abcdef
