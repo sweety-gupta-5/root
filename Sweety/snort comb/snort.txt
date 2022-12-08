@@ -14,6 +14,11 @@ snort -i 4 -c C:\Snort\etc\snort.conf -A console
 
 https://youtu.be/-AkUidedDlY
 
+https://www.winpcap.org/install/default.htm
+
+https://linkgenie.me/s/V4fQ0
+
+
 https://www.securityarchitecture.com/learning/intrusion-detection-systems-learning-with-snort/configuring-snort/
 
 
